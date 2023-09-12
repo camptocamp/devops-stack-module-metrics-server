@@ -2,20 +2,22 @@
 ## Standard variables
 #######################
 
-variable "cluster_name" {
-  description = "Name given to the cluster. Value used for naming some the resources created by the module."
-  type        = string
-}
-
-variable "base_domain" {
-  description = "Base domain of the cluster. Value used for the ingress' URL of the application."
-  type        = string
-}
-
 variable "argocd_namespace" {
   description = "Namespace used by Argo CD where the Application and AppProject resources should be created."
   type        = string
   default     = "argocd"
+}
+
+variable "argocd_project" {
+  description = "Name of the Argo CD AppProject where the Application should be created. If not set, the Application will be created in a new AppProject only for this Application."
+  type        = string
+  default     = null
+}
+
+variable "destination_cluster" {
+  description = "Destination cluster where the application should be deployed."
+  type        = string
+  default     = "in-cluster"
 }
 
 variable "target_revision" {
@@ -24,16 +26,10 @@ variable "target_revision" {
   default     = "v1.0.0" # x-release-please-version
 }
 
-variable "cluster_issuer" {
-  description = "SSL certificate issuer to use. Usually you would configure this value as `letsencrypt-staging` or `letsencrypt-prod` on your root `*.tf` files."
-  type        = string
-  default     = "ca-issuer"
-}
-
 variable "namespace" {
   description = "Namespace where the applications's Kubernetes resources should be created. Namespace will be created in case it doesn't exist."
   type        = string
-  default     = "<NAMESPACE>"
+  default     = "kube-system"
 }
 
 variable "helm_values" {
@@ -65,3 +61,9 @@ variable "dependency_ids" {
 #######################
 ## Module variables
 #######################
+
+variable "kubelet_insecure_tls" {
+  description = "Whether metrics-server should be configured to accept insecure TLS connections when kubelet does not have valit SSL certificates."
+  type        = bool
+  default     = false
+}

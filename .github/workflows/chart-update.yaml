@@ -1,14 +1,9 @@
-# In case you module has a chart that has dependencies, you can use this workflow to automate the update of the chart dependencies.
 ---
 name: "chart-update"
 
 on:
-  # Do not forget to reactivate chart-update on your module. It was deactivated here to avoid running the workflow on 
-  # the template for nothing.
-  # Simply uncomment the schedule block.
-  
-  # schedule:
-  # - cron: "0 7 * * 1-5"
+  schedule:
+  - cron: "0 7 * * 1-5"
   
   workflow_dispatch:
     inputs:
