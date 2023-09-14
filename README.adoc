@@ -30,7 +30,6 @@ module "metrics-server" {
 
   kubelet_insecure_tls = false # By default is false, but you can enable it, for example on KinD.
 
-  # TODO Consider replacing this depends_on by our dependency_ids
   dependency_ids = {
     argocd = module.argocd_bootstrap.id
   }
