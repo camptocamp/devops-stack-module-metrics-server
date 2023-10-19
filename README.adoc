@@ -1,57 +1,48 @@
-= devops-stack-module-template
+= devops-stack-module-metrics-server
 // Document attributes to replace along the document
-// Here you can define variables for something that keeps repeating along the text
-:CHART-NAME-chart-version: 1.2.3
-:original-repo-url: https://github.com/path/to/some/repository
+:metrics-server-chart-version: 3.11.0
+:original-repo-url: https://github.com/kubernetes-sigs/metrics-server
 
-A https://devops-stack.io[DevOps Stack] module to deploy *_something_*.
+A https://devops-stack.io[DevOps Stack] module to deploy {original-repo-url}[Kubernetes Metrics Server].
 
-The *_something_* chart used by this module is shipped in this repository as well, in order to avoid any unwanted behaviors caused by unsupported versions. 
+The Metrics Server chart used by this module is shipped in this repository as well, in order to avoid any unwanted behaviors caused by unsupported versions. 
 
 [cols="1,1,1",options="autowidth,header"]
 |===
 |Current Chart Version |Original Repository |Default Values
-|*{CHART-NAME-chart-version}* |{original-repo-url}/subpath/to/the/chart[Chart] |{original-repo-url}//subpath/to/the/values.yaml[`values.yaml`] (_here you can also use artifacthub.io_)
+|*{metrics-server-chart-version}* |{original-repo-url}/tree/master/charts/metrics-server[Chart] |https://artifacthub.io/packages/helm/metrics-server/metrics-server/{metrics-server-chart-version}?modal=values[`values.yaml`]
 |===
+
+NOTE: This module is only used on platforms that do not install Metrics Server by default, such as Amazon EKS and KinD.
 
 == Usage
 
-_Here you will show examples of how to call this module on your code. Note that the `depends_on` needs to be adapted to your use case._
-
-_You can start by giving a simple example and then show some others with increasing complexity and/or for specific use cases._
+This module can be declared by adding the following block on your Terraform configuration:
 
 [source,terraform]
 ----
-module "template" {
-  source = "git::https://github.com/camptocamp/devops-stack-module-template.git?ref=<RELEASE>"
+module "metrics-server" {
+  source = "git::https://github.com/camptocamp/devops-stack-module-metrics-server.git?ref=<RELEASE>"
 
-  cluster_name            = local.cluster_name
-  argocd_namespace        = local.argocd_namespace
+  argocd_namespace = module.argocd_bootstrap.argocd_namespace
 
-  # TODO Consider replacing this depends_on by our dependency_ids
-  depends_on = [
-    module.argocd_bootstrap,
-  ]
+  app_autosync = local.app_autosync
+
+  kubelet_insecure_tls = false # By default is false, but you can enable it, for example on KinD.
+
+  dependency_ids = {
+    argocd = module.argocd_bootstrap.id
+  }
 }
 ----
 
-=== Something Explained Better
-
-_If there is some part of the module's configuration that needs more specific explanations, such as a very particular output on which every other module depends on, maybe consider creating a subsection to improve readability._
-
-NOTE: _The AsciiDoc syntax provides a way to write admonitions such as this one, so use it if you think it is useful. The https://docs.antora.org/antora/latest/asciidoc/admonitions/[official documentation] for Antora Docs provides more examples._
-
 == Technical Reference
-
-_This section will contain the more technical details of the module. It is mainly generated automatically by Terraform Docs (everything that is between the comments `BEGIN_TF_DOCS` / `END_TF_DOCS`). However, it is recommended to, at the bare minimum, add a dependencies section to explain the reason on why this module could depend on another one from the DevOps Stack._
-
-_You can safely delete the content between the comments `BEGIN_TF_DOCS` / `END_TF_DOCS` and `BEGIN_TF_TABLES` / `END_TF_TABLES` when creating your on module._
 
 === Dependencies
 
-==== `module.argocd_bootstrap`
+==== `module.argocd_bootstrap.id`
 
-This module must be one of the first ones to be deployed and consequently it needs to be deployed after the module `argocd_bootstrap`.
+This module depends on Argo CD resources to be deployed, so it needs do be deployed after the module `argocd_bootstrap`.
 
 // BEGIN_TF_DOCS
 === Requirements
@@ -84,22 +75,6 @@ The following resources are used by this module:
 - https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource[null_resource.this] (resource)
 - https://registry.terraform.io/providers/cloudposse/utils/latest/docs/data-sources/deep_merge_yaml[utils_deep_merge_yaml.values] (data source)
 
-=== Required Inputs
-
-The following input variables are required:
-
-==== [[input_cluster_name]] <<input_cluster_name,cluster_name>>
-
-Description: Name given to the cluster. Value used for naming some the resources created by the module.
-
-Type: `string`
-
-==== [[input_base_domain]] <<input_base_domain,base_domain>>
-
-Description: Base domain of the cluster. Value used for the ingress' URL of the application.
-
-Type: `string`
-
 === Optional Inputs
 
 The following input variables are optional (have default values):
@@ -112,6 +87,30 @@ Type: `string`
 
 Default: `"argocd"`
 
+==== [[input_argocd_project]] <<input_argocd_project,argocd_project>>
+
+Description: Name of the Argo CD AppProject where the Application should be created. If not set, the Application will be created in a new AppProject only for this Application.
+
+Type: `string`
+
+Default: `null`
+
+==== [[input_argocd_labels]] <<input_argocd_labels,argocd_labels>>
+
+Description: Labels to attach to the Argo CD Application resource.
+
+Type: `map(string)`
+
+Default: `{}`
+
+==== [[input_destination_cluster]] <<input_destination_cluster,destination_cluster>>
+
+Description: Destination cluster where the application should be deployed.
+
+Type: `string`
+
+Default: `"in-cluster"`
+
 ==== [[input_target_revision]] <<input_target_revision,target_revision>>
 
 Description: Override of target revision of the application chart.
@@ -120,21 +119,13 @@ Type: `string`
 
 Default: `"v1.0.0"`
 
-==== [[input_cluster_issuer]] <<input_cluster_issuer,cluster_issuer>>
-
-Description: SSL certificate issuer to use. Usually you would configure this value as `letsencrypt-staging` or `letsencrypt-prod` on your root `*.tf` files.
-
-Type: `string`
-
-Default: `"ca-issuer"`
-
 ==== [[input_namespace]] <<input_namespace,namespace>>
 
 Description: Namespace where the applications's Kubernetes resources should be created. Namespace will be created in case it doesn't exist.
 
 Type: `string`
 
-Default: `"<NAMESPACE>"`
+Default: `"kube-system"`
 
 ==== [[input_helm_values]] <<input_helm_values,helm_values>>
 
@@ -176,6 +167,14 @@ Type: `map(string)`
 
 Default: `{}`
 
+==== [[input_kubelet_insecure_tls]] <<input_kubelet_insecure_tls,kubelet_insecure_tls>>
+
+Description: Whether metrics-server should be configured to accept insecure TLS connections when kubelet does not have valit SSL certificates.
+
+Type: `bool`
+
+Default: `false`
+
 === Outputs
 
 The following outputs are exported:
@@ -206,9 +205,9 @@ Description: ID to pass other modules in order to refer to this module as a depe
 [cols="a,a",options="header,autowidth"]
 |===
 |Name |Version
+|[[provider_null]] <<provider_null,null>> |>= 3
 |[[provider_utils]] <<provider_utils,utils>> |>= 1
 |[[provider_argocd]] <<provider_argocd,argocd>> |>= 5
-|[[provider_null]] <<provider_null,null>> |>= 3
 |===
 
 = Resources
@@ -228,22 +227,28 @@ Description: ID to pass other modules in order to refer to this module as a depe
 [cols="a,a,a,a,a",options="header,autowidth"]
 |===
 |Name |Description |Type |Default |Required
-|[[input_cluster_name]] <<input_cluster_name,cluster_name>>
-|Name given to the cluster. Value used for naming some the resources created by the module.
-|`string`
-|n/a
-|yes
-
-|[[input_base_domain]] <<input_base_domain,base_domain>>
-|Base domain of the cluster. Value used for the ingress' URL of the application.
-|`string`
-|n/a
-|yes
-
 |[[input_argocd_namespace]] <<input_argocd_namespace,argocd_namespace>>
 |Namespace used by Argo CD where the Application and AppProject resources should be created.
 |`string`
 |`"argocd"`
+|no
+
+|[[input_argocd_project]] <<input_argocd_project,argocd_project>>
+|Name of the Argo CD AppProject where the Application should be created. If not set, the Application will be created in a new AppProject only for this Application.
+|`string`
+|`null`
+|no
+
+|[[input_argocd_labels]] <<input_argocd_labels,argocd_labels>>
+|Labels to attach to the Argo CD Application resource.
+|`map(string)`
+|`{}`
+|no
+
+|[[input_destination_cluster]] <<input_destination_cluster,destination_cluster>>
+|Destination cluster where the application should be deployed.
+|`string`
+|`"in-cluster"`
 |no
 
 |[[input_target_revision]] <<input_target_revision,target_revision>>
@@ -252,16 +257,10 @@ Description: ID to pass other modules in order to refer to this module as a depe
 |`"v1.0.0"`
 |no
 
-|[[input_cluster_issuer]] <<input_cluster_issuer,cluster_issuer>>
-|SSL certificate issuer to use. Usually you would configure this value as `letsencrypt-staging` or `letsencrypt-prod` on your root `*.tf` files.
-|`string`
-|`"ca-issuer"`
-|no
-
 |[[input_namespace]] <<input_namespace,namespace>>
 |Namespace where the applications's Kubernetes resources should be created. Namespace will be created in case it doesn't exist.
 |`string`
-|`"<NAMESPACE>"`
+|`"kube-system"`
 |no
 
 |[[input_helm_values]] <<input_helm_values,helm_values>>
@@ -300,6 +299,12 @@ object({
 |IDs of the other modules on which this module depends on.
 |`map(string)`
 |`{}`
+|no
+
+|[[input_kubelet_insecure_tls]] <<input_kubelet_insecure_tls,kubelet_insecure_tls>>
+|Whether metrics-server should be configured to accept insecure TLS connections when kubelet does not have valit SSL certificates.
+|`bool`
+|`false`
 |no
 
 |===
