@@ -32,12 +32,6 @@ variable "target_revision" {
   default     = "v1.0.0" # x-release-please-version
 }
 
-variable "namespace" {
-  description = "Namespace where the applications's Kubernetes resources should be created. Namespace will be created in case it doesn't exist."
-  type        = string
-  default     = "kube-system"
-}
-
 variable "helm_values" {
   description = "Helm chart value overrides. They should be passed as a list of HCL structures."
   type        = any
