@@ -56,6 +56,25 @@ variable "dependency_ids" {
 ## Module variables
 #######################
 
+variable "resources" {
+  description = <<-EOT
+    Resource limits and requests for metrics-servers's pods. Follow the style on https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[official documentation] to understand the format of the values.
+
+    NOTE: These are the same values as the defaults on the Helm chart. Usually they guarantee good performance for most cluster configurations up to 100 nodes. See https://github.com/kubernetes-sigs/metrics-server?tab=readme-ov-file#scaling[the official documentation] for more information.
+  EOT
+  type = object({
+    requests = optional(object({
+      cpu    = optional(string, "100m")
+      memory = optional(string, "256Mi")
+    }), {})
+    limits = optional(object({
+      cpu    = optional(string)
+      memory = optional(string, "256Mi")
+    }), {})
+  })
+  default = {}
+}
+
 variable "kubelet_insecure_tls" {
   description = "Whether metrics-server should be configured to accept insecure TLS connections when kubelet does not have valit SSL certificates."
   type        = bool
