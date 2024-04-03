@@ -59,11 +59,11 @@ The following requirements are needed by this module:
 
 The following providers are used by this module:
 
-- [[provider_null]] <<provider_null,null>> (>= 3)
+- [[provider_utils]] <<provider_utils,utils>> (>= 1)
 
 - [[provider_argocd]] <<provider_argocd,argocd>> (>= 5)
 
-- [[provider_utils]] <<provider_utils,utils>> (>= 1)
+- [[provider_null]] <<provider_null,null>> (>= 3)
 
 === Resources
 
@@ -109,7 +109,7 @@ Description: Override of target revision of the application chart.
 
 Type: `string`
 
-Default: `"v1.0.0"`
+Default: `"v2.0.0"`
 
 ==== [[input_helm_values]] <<input_helm_values,helm_values>>
 
@@ -151,6 +151,29 @@ Type: `map(string)`
 
 Default: `{}`
 
+==== [[input_resources]] <<input_resources,resources>>
+
+Description: Resource limits and requests for metrics-servers's pods. Follow the style on https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[official documentation] to understand the format of the values.
+
+NOTE: These are the same values as the defaults on the Helm chart. Usually they guarantee good performance for most cluster configurations up to 100 nodes. See https://github.com/kubernetes-sigs/metrics-server?tab=readme-ov-file#scaling[the official documentation] for more information.
+
+Type:
+[source,hcl]
+----
+object({
+    requests = optional(object({
+      cpu    = optional(string, "100m")
+      memory = optional(string, "256Mi")
+    }), {})
+    limits = optional(object({
+      cpu    = optional(string)
+      memory = optional(string, "256Mi")
+    }), {})
+  })
+----
+
+Default: `{}`
+
 ==== [[input_kubelet_insecure_tls]] <<input_kubelet_insecure_tls,kubelet_insecure_tls>>
 
 Description: Whether metrics-server should be configured to accept insecure TLS connections when kubelet does not have valit SSL certificates.
@@ -189,9 +212,9 @@ Description: ID to pass other modules in order to refer to this module as a depe
 [cols="a,a",options="header,autowidth"]
 |===
 |Name |Version
+|[[provider_null]] <<provider_null,null>> |>= 3
 |[[provider_utils]] <<provider_utils,utils>> |>= 1
 |[[provider_argocd]] <<provider_argocd,argocd>> |>= 5
-|[[provider_null]] <<provider_null,null>> |>= 3
 |===
 
 = Resources
@@ -232,7 +255,7 @@ Description: ID to pass other modules in order to refer to this module as a depe
 |[[input_target_revision]] <<input_target_revision,target_revision>>
 |Override of target revision of the application chart.
 |`string`
-|`"v1.0.0"`
+|`"v2.0.0"`
 |no
 
 |[[input_helm_values]] <<input_helm_values,helm_values>>
@@ -270,6 +293,30 @@ object({
 |[[input_dependency_ids]] <<input_dependency_ids,dependency_ids>>
 |IDs of the other modules on which this module depends on.
 |`map(string)`
+|`{}`
+|no
+
+|[[input_resources]] <<input_resources,resources>>
+|Resource limits and requests for metrics-servers's pods. Follow the style on https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[official documentation] to understand the format of the values.
+
+NOTE: These are the same values as the defaults on the Helm chart. Usually they guarantee good performance for most cluster configurations up to 100 nodes. See https://github.com/kubernetes-sigs/metrics-server?tab=readme-ov-file#scaling[the official documentation] for more information.
+
+|
+
+[source]
+----
+object({
+    requests = optional(object({
+      cpu    = optional(string, "100m")
+      memory = optional(string, "256Mi")
+    }), {})
+    limits = optional(object({
+      cpu    = optional(string)
+      memory = optional(string, "256Mi")
+    }), {})
+  })
+----
+
 |`{}`
 |no
 
