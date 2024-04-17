@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/camptocamp/devops-stack-module-metrics-server/compare/v2.0.0...v2.1.0) (2024-04-17)
+
+
+### Features
+
+* add variable to set resources with default values ([#5](https://github.com/camptocamp/devops-stack-module-metrics-server/issues/5)) ([5f9af83](https://github.com/camptocamp/devops-stack-module-metrics-server/commit/5f9af83ebcdb2b63951182554ef7713b995e4f42))
+
 ## [2.0.0](https://github.com/camptocamp/devops-stack-module-metrics-server/compare/v1.0.0...v2.0.0) (2024-01-19)
 
 
