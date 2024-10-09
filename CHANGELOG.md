@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/camptocamp/devops-stack-module-metrics-server/compare/v2.1.0...v3.0.0) (2024-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* point the Argo CD provider to the new repository ([#7](https://github.com/camptocamp/devops-stack-module-metrics-server/issues/7))
+
+### Features
+
+* point the Argo CD provider to the new repository ([#7](https://github.com/camptocamp/devops-stack-module-metrics-server/issues/7)) ([ebbbeee](https://github.com/camptocamp/devops-stack-module-metrics-server/commit/ebbbeee351b55129a08359d37a9c3cccee6db834))
+
 ## [2.1.0](https://github.com/camptocamp/devops-stack-module-metrics-server/compare/v2.0.0...v2.1.0) (2024-04-17)
 
 
